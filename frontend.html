@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Choose to Reuse DApp</title>
+  <!-- Include Ethers.js (via CDN) -->
+  <script type="module">
+    import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.6/dist/ethers.esm.min.js";
+    window.ethers = ethers; // Make ethers globally accessible
+  </script>
+  <!-- Include HTML5 QR code scanner library -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <h2>Choose to Reuse – Container Borrow/Return</h2>
+
+  <!-- Button to connect MetaMask -->
+  <button id="connectBtn">Connect Wallet</button>
+  <p>Connected Wallet: <span id="walletAddress">None</span></p>
+
+  <!-- QR code scanner section -->
+  <h3>Scan Container QR Code:</h3>
+  <div id="reader" style="width: 300px; height: 300px; border: 1px solid gray;"></div>
+  <button onclick="startScanning()">Start Scanning</button>
+  <button onclick="stopScanning()">Stop Scanning</button>
+  <p id="scanResult">Scan a container QR code to borrow/return.</p>
+
+  <script>
+    let provider, signer, contract;
+    const contractAddress = "0x34FeCB5c3f718da890426652F1Cde2C77F58C4d3"; // Replace with your contract address
+    const contractABI = [
+  {
+    "inputs": [],
+    "name": "depositAmount",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "containerId", "type": "string" }],
+    "name": "isBorrowed",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "containerId", "type": "string" }
+    ],
+    "name": "borrowContainer",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "containerId", "type": "string" }
+    ],
+    "name": "returnContainer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+
+    // Function to connect to MetaMask
+    document.getElementById('connectBtn').onclick = async function () {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          contract = new ethers.Contract(contractAddress, contractABI, signer);
+          const userAddress = await signer.getAddress();
+          document.getElementById('walletAddress').innerText = userAddress;
+          console.log("Connected with address:", userAddress);
+          window.contract = contract; // Make the contract globally accessible
+        } catch (err) {
+          console.error("Connection to MetaMask failed:", err);
+        }
+      } else {
+        alert("MetaMask is not installed. Please install it to use this DApp.");
+      }
+    };
+
+    let qrScanner;
+
+    // Start the QR code scanner
+    function startScanning() {
+      if (!qrScanner) {
+        qrScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        qrScanner.render(onScanSuccess);
+      }
+    }
+
+    // Stop/clear the scanner
+    function stopScanning() {
+      if (qrScanner) {
+        qrScanner.clear();
+      }
+    }
+
+    // Callback when a QR code is successfully scanned
+    async function onScanSuccess(decodedText, decodedResult) {
+      console.log(`QR code scanned: ${decodedText}`);
+      document.getElementById('scanResult').innerText = `Scanned ID: ${decodedText}`;
+      stopScanning(); // Stop scanning after one result (optional)
+
+      if (!window.contract) {
+        alert("Connect wallet first!");
+        return;
+      }
+
+      try {
+        const currentlyBorrowed = await window.contract.isBorrowed(decodedText);
+        let tx;
+        if (!currentlyBorrowed) {
+          tx = await window.contract.borrowContainer(decodedText, { value: ethers.utils.parseEther("0.001") });
+          await tx.wait();
+          alert("✅ Container borrowed successfully!");
+        } else {
+          tx = await window.contract.returnContainer(decodedText);
+          await tx.wait();
+          alert("✅ Container returned successfully!");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Transaction failed: " + (error.message || error));
+      }
+    }
+  </script>
+</body>
+</html>
