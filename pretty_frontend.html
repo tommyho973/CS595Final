@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choose to Reuse DApp</title>
+
+    <!-- Tailwind – quick styling without a build step -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- ethers.js (ES‑module build) → made global so non‑module scripts can use it -->
+    <script type="module">
+      import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
+      window.ethers = ethers;
+    </script>
+
+    <!-- html5‑qrcode (scanner) -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <!-- qrcode (generator) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  </head>
+
+  <body class="bg-gray-100 text-gray-900 min-h-screen">
+    <div class="max-w-3xl mx-auto p-6 space-y-8">
+      <h1 class="text-2xl font-bold text-center">Choose to Reuse – Container DApp</h1>
+
+      <!-- Wallet card -->
+      <section class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Wallet</h2>
+        <button id="connectBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Connect Wallet</button>
+        <p class="mt-3 text-sm">Connected Wallet: <span id="walletAddress" class="font-mono">None</span></p>
+      </section>
+
+      <!-- QR generator -->
+      <section class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Generate Container QR</h2>
+        <button id="generateQrBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Generate</button>
+        <p class="mt-3 text-sm">Generated ID: <span id="generatedId" class="font-mono">—</span></p>
+        <canvas id="qrcanvas" class="mt-4 mx-auto"></canvas>
+      </section>
+
+      <!-- Scanner -->
+      <section class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Scan Container QR</h2>
+        <div id="reader" class="mx-auto" style="width: 300px; height: 300px;"></div>
+        <div class="flex gap-4 mt-4">
+          <button id="startScan" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Start Scanning</button>
+          <button id="stopScan" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">Stop Scanning</button>
+        </div>
+        <p class="mt-3 text-sm" id="scanResult">Waiting for scan…</p>
+      </section>
+    </div>
+
+    <!-- Main logic (deferred) -->
+    <script defer>
+      /*****************************************
+       * GLOBAL STATE
+       *****************************************/
+      let provider, signer, contract;
+
+      const contractAddress = "0x34FeCB5c3f718da890426652F1Cde2C77F58C4d3"; // ← replace if needed
+      const contractABI = [
+        { "inputs": [], "name": "depositAmount", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
+        { "inputs": [ { "internalType": "string", "name": "containerId", "type": "string" } ], "name": "isBorrowed", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" },
+        { "inputs": [ { "internalType": "string", "name": "containerId", "type": "string" } ], "name": "borrowContainer", "outputs": [], "stateMutability": "payable", "type": "function" },
+        { "inputs": [ { "internalType": "string", "name": "containerId", "type": "string" } ], "name": "returnContainer", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+      ];
+
+      /*****************************************
+       * WALLET CONNECT
+       *****************************************/
+      document.getElementById("connectBtn").addEventListener("click", async () => {
+        if (!window.ethereum) return alert("MetaMask not detected");
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          contract = new ethers.Contract(contractAddress, contractABI, signer);
+          document.getElementById("walletAddress").textContent = await signer.getAddress();
+          window.contract = contract; // expose for console debugging
+        } catch (err) {
+          console.error(err);
+          alert(err.message || "Connection failed");
+        }
+      });
+
+      /*****************************************
+       * QR CODE GENERATION
+       *****************************************/
+      document.getElementById("generateQrBtn").addEventListener("click", () => {
+        const id = randomId(10);
+        document.getElementById("generatedId").textContent = id;
+        const canvas = document.getElementById("qrcanvas");
+        QRCode.toCanvas(canvas, id, { width: 256 }, (err) => {
+          if (err) console.error(err);
+        });
+      });
+
+      function randomId(len = 8) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+      }
+
+      /*****************************************
+       * QR SCANNER
+       *****************************************/
+      let qrScanner;
+
+      function startScanning() {
+        if (!qrScanner) {
+          qrScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+          qrScanner.render(onScanSuccess);
+        }
+      }
+      function stopScanning() {
+        if (qrScanner) qrScanner.clear();
+      }
+
+      document.getElementById("startScan").addEventListener("click", startScanning);
+      document.getElementById("stopScan").addEventListener("click", stopScanning);
+
+      async function onScanSuccess(decodedText) {
+        document.getElementById("scanResult").textContent = `Scanned ID: ${decodedText}`;
+        stopScanning();
+        if (!window.contract) return alert("Connect wallet first");
+
+        try {
+          const borrowed = await window.contract.isBorrowed(decodedText);
+          const tx = borrowed
+            ? await window.contract.returnContainer(decodedText)
+            : await window.contract.borrowContainer(decodedText, { value: ethers.utils.parseEther("0.001") });
+          await tx.wait();
+          alert(borrowed ? "✅ Container returned!" : "✅ Container borrowed!");
+        } catch (err) {
+          console.error(err);
+          alert(err.message || "Transaction failed");
+        }
+      }
+    </script>
+  </body>
+</html>
