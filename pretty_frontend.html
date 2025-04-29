@@ -1,70 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Choose to Reuse DApp</title>
-
-    <!-- Tailwind for quick styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- ethers.js → make globally available -->
-    <script type="module">
-      import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
-      window.ethers = ethers;
-    </script>
-
-    <!-- html5‑qrcode (scanner) & qrcode (generator) -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  </head>
-
-  <body class="bg-gray-100 text-gray-900 min-h-screen">
-    <div class="max-w-3xl mx-auto p-6 space-y-10">
-      <h1 class="text-3xl font-bold text-center">Choose to Reuse ⚡️</h1>
-
-      <!-- Wallet section -->
-      <section class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">1· Connect Wallet</h2>
-        <button id="connectBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Connect MetaMask</button>
-        <p class="mt-3 text-sm">Connected: <span id="walletAddress" class="font-mono">—</span></p>
-      </section>
-
-      <!-- QR GENERATOR section -->
-      <section class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">2· Generate New Container QR</h2>
-        <button id="generateQrBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Generate QR</button>
-        <p class="mt-3 text-sm">ID: <span id="generatedId" class="font-mono">—</span></p>
-        <div class="flex justify-center mt-4">
-          <canvas id="qrcanvas" class="border rounded-lg"></canvas>
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>Choose to Reuse DApp</title>
+  php-template
+  Copy
+  Edit
+  <!-- Tailwind for styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- ethers.js (via module) -->
+  <script type="module">
+    import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
+    window.ethers = ethers;
+  </script>
+  
+  <!-- QR Scanner & Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  </head> <body class="bg-gray-100 text-gray-900 min-h-screen"> <div class="max-w-3xl mx-auto p-6 space-y-10"> <h1 class="text-3xl font-bold text-center">Choose to Reuse ⚡️</h1>
+  php-template
+  Copy
+  Edit
+    <!-- Wallet Connect -->
+    <section class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">1· Connect Wallet</h2>
+      <button id="connectBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Connect MetaMask</button>
+      <p class="mt-3 text-sm">Connected: <span id="walletAddress" class="font-mono">—</span></p>
+    </section>
+  
+    <!-- QR Generator -->
+    <section class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">2· Generate New Container QR</h2>
+      <button id="generateQrBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Generate QR</button>
+      <p class="mt-3 text-sm">ID: <span id="generatedId" class="font-mono">—</span></p>
+      <div class="flex justify-center mt-4">
+        <canvas id="qrcanvas" class="border rounded-lg"></canvas>
+      </div>
+    </section>
+  
+    <!-- QR Scanner -->
+    <section class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">3· Borrow / Return – Scan Container QR</h2>
+      <div id="reader" class="mx-auto" style="width: 300px; height: 300px;"></div>
+      <div class="flex gap-4 mt-4">
+        <button id="startScan" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Start Scanning</button>
+        <button id="stopScan" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">Stop Scanning</button>
+      </div>
+      <p class="mt-3 text-sm" id="scanResult">Waiting for scan…</p>
+    </section>
+  
+    <!-- Owner Admin Panel -->
+    <section class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">4· Owner Admin Panel</h2>
+      <div id="loginForm" class="flex flex-col sm:flex-row items-center gap-2 mb-4">
+        <input id="ownerUsername" type="text" placeholder="Username" class="border px-2 py-1 rounded" />
+        <input id="ownerPassword" type="password" placeholder="Password" class="border px-2 py-1 rounded" />
+        <button id="loginBtn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Login</button>
+      </div>
+      <div id="adminPanel" style="display: none;">
+        <button id="claimBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Claim Expired Deposits</button>
+        <div class="mt-3">
+          <input id="newDeposit" type="text" placeholder="New deposit (ETH)" class="border px-2 py-1 rounded" />
+          <button id="updateDepositBtn" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">Update Deposit</button>
         </div>
-      </section>
-
-      <!-- QR SCANNER section -->
-      <section class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">3· Borrow / Return – Scan Container QR</h2>
-        <div id="reader" class="mx-auto" style="width: 300px; height: 300px;"></div>
-        <div class="flex gap-4 mt-4">
-          <button id="startScan" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Start Scanning</button>
-          <button id="stopScan" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">Stop Scanning</button>
+        <div class="mt-2">
+          <input id="newDuration" type="number" placeholder="New duration (seconds)" class="border px-2 py-1 rounded" />
+          <button id="updateDurationBtn" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">Update Duration</button>
         </div>
-        <p class="mt-3 text-sm" id="scanResult">Waiting for scan…</p>
-      </section>
-    </div>
-
-    <!-- LOGIC -->
-    <script defer>
-      /* ------------------  GLOBALS  ------------------ */
+      </div>
+    </section>
+  </div>
+  
+  <!-- JavaScript Logic -->
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
       let provider, signer, contract;
-      const contractAddress = "0x34FeCB5c3f718da890426652F1Cde2C77F58C4d3"; // <‑ replace if redeployed
+      const contractAddress = "0xbEB46B92409316eC320F94dD5710112A326b9a72"; // replace with actual
       const contractABI = [
         { inputs: [], name: "depositAmount", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
+        { inputs: [], name: "owner", outputs: [{ internalType: "address", name: "", type: "address" }], stateMutability: "view", type: "function" },
         { inputs: [{ internalType: "string", name: "containerId", type: "string" }], name: "isBorrowed", outputs: [{ internalType: "bool", name: "", type: "bool" }], stateMutability: "view", type: "function" },
         { inputs: [{ internalType: "string", name: "containerId", type: "string" }], name: "borrowContainer", outputs: [], stateMutability: "payable", type: "function" },
-        { inputs: [{ internalType: "string", name: "containerId", type: "string" }], name: "returnContainer", outputs: [], stateMutability: "nonpayable", type: "function" }
+        { inputs: [{ internalType: "string", name: "containerId", type: "string" }], name: "returnContainer", outputs: [], stateMutability: "nonpayable", type: "function" },
+        { inputs: [], name: "forfeitExpiredDeposits", outputs: [], stateMutability: "nonpayable", type: "function" },
+        { inputs: [{ internalType: "uint256", name: "newAmount", type: "uint256" }], name: "setDepositAmount", outputs: [], stateMutability: "nonpayable", type: "function" },
+        { inputs: [{ internalType: "uint256", name: "newDuration", type: "uint256" }], name: "setBorrowDuration", outputs: [], stateMutability: "nonpayable", type: "function" }
       ];
-
-      /* ------------------  CONNECT  ------------------ */
+  
       document.getElementById("connectBtn").addEventListener("click", async () => {
         if (!window.ethereum) return alert("MetaMask not detected");
         try {
@@ -73,36 +92,22 @@
           signer = provider.getSigner();
           contract = new ethers.Contract(contractAddress, contractABI, signer);
           document.getElementById("walletAddress").textContent = await signer.getAddress();
-          window.contract = contract; // debug
+          window.contract = contract;
         } catch (err) {
           console.error(err);
           alert(err.message || "Connection failed");
         }
       });
-
-      /* ------------------  QR GENERATION  ------------------ */
+  
       document.getElementById("generateQrBtn").addEventListener("click", () => {
-        const id = randomId(12);
+        const id = Array.from({ length: 12 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)]).join("");
         document.getElementById("generatedId").textContent = id;
         const canvas = document.getElementById("qrcanvas");
-        // clear previous QR
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // generate new QR
-        QRCode.toCanvas(
-          canvas,
-          id,
-          { width: 256, margin: 1, color: { dark: "#000", light: "#FFF" } },
-          (err) => err && console.error(err)
-        );
+        QRCode.toCanvas(canvas, id, { width: 256, margin: 1 }, (err) => err && console.error(err));
       });
-
-      function randomId(len = 10) {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-      }
-
-      /* ------------------  QR SCANNING  ------------------ */
+  
       let qrScanner;
       document.getElementById("startScan").addEventListener("click", () => {
         if (!qrScanner) {
@@ -110,10 +115,10 @@
           qrScanner.render(handleScan);
         }
       });
-      document.getElementById("stopScan").addEventListener("click", () => qrScanner && qrScanner.clear());
-
+      document.getElementById("stopScan").addEventListener("click", () => qrScanner?.clear());
+  
       async function handleScan(decodedText) {
-        document.getElementById("scanResult").textContent = `Scanned ID: ${decodedText}`;
+        document.getElementById("scanResult").textContent = `Scanned ID: ${decodedText}`;
         qrScanner.clear();
         if (!window.contract) return alert("Connect your wallet first.");
         try {
@@ -122,13 +127,65 @@
             ? await window.contract.returnContainer(decodedText)
             : await window.contract.borrowContainer(decodedText, { value: ethers.utils.parseEther("0.001") });
           await tx.wait();
-          alert(borrowed ? "✅ Returned" : "✅ Borrowed");
+          alert(borrowed ? "✅ Returned" : "✅ Borrowed");
         } catch (err) {
           console.error(err);
           alert(err.error?.message || err.message || "TX failed");
         }
       }
-    </script>
-  </body>
-</html>
-
+  
+      // ADMIN LOGIN
+      const adminUsername = "terrier";
+      const adminPassword = "terrier123";
+  
+      document.getElementById("loginBtn").addEventListener("click", () => {
+        const enteredUser = document.getElementById("ownerUsername").value;
+        const enteredPass = document.getElementById("ownerPassword").value;
+        if (enteredUser === adminUsername && enteredPass === adminPassword) {
+          document.getElementById("loginForm").style.display = "none";
+          document.getElementById("adminPanel").style.display = "block";
+        } else {
+          alert("Incorrect admin credentials.");
+        }
+      });
+  
+      document.getElementById("claimBtn").addEventListener("click", async () => {
+        try {
+          const tx = await contract.forfeitExpiredDeposits();
+          await tx.wait();
+          alert("✅ Expired deposits claimed.");
+        } catch (err) {
+          console.error(err);
+          alert(err.error?.message || err.message || "Transaction failed");
+        }
+      });
+  
+      document.getElementById("updateDepositBtn").addEventListener("click", async () => {
+        const val = document.getElementById("newDeposit").value;
+        if (!val) return alert("Enter deposit (ETH)");
+        try {
+          const tx = await contract.setDepositAmount(ethers.utils.parseEther(val));
+          await tx.wait();
+          alert("✅ Deposit updated.");
+        } catch (err) {
+          console.error(err);
+          alert(err.error?.message || err.message || "Transaction failed");
+        }
+      });
+  
+      document.getElementById("updateDurationBtn").addEventListener("click", async () => {
+        const val = document.getElementById("newDuration").value;
+        if (!val) return alert("Enter duration (seconds)");
+        try {
+          const seconds = parseInt(val);
+          const tx = await contract.setBorrowDuration(seconds);
+          await tx.wait();
+          alert("✅ Duration updated.");
+        } catch (err) {
+          console.error(err);
+          alert(err.error?.message || err.message || "Transaction failed");
+        }
+      });
+    });
+  </script>
+  </body> </html>
