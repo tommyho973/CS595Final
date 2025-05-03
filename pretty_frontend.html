@@ -39,6 +39,12 @@
       </div>
       <p class="mt-3 text-sm" id="scanResult">Waiting for scan…</p>
     </section>
+    <!-- TX Hash -->
+     <section class="bg-white rounded-2xl shadow p-6">
+        <div class="mt-4 text-sm text-gray-700">
+        Last TX Hash: <a id="txHash" href="#" target="_blank" class="text-blue-600 underline">None</a>
+        </div>
+     </section>
   
     <!-- Owner Admin Panel -->
     <section class="bg-white rounded-2xl shadow p-6">
@@ -53,6 +59,10 @@
           <input id="newDuration" type="number" placeholder="New duration (seconds)" class="border px-2 py-1 rounded" />
           <button id="updateDurationBtn" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">Update Duration</button>
         </div>
+      </div>
+      <!-- Admin TX Hash -->
+      <div id="adminTxHashSection" class="mt-4 text-sm text-gray-700" style="display: none;">
+          Admin TX Hash: <a id="adminTxHash" href="#" target="_blank" class="text-blue-600 underline">None</a>
       </div>
     </section>
   </div>
@@ -120,6 +130,8 @@
           const tx = borrowed
             ? await window.contract.returnContainer(decodedText)
             : await window.contract.borrowContainer(decodedText, { value: ethers.utils.parseEther("0.001") });
+          document.getElementById("txHash").textContent = tx.hash;
+          document.getElementById("txHash").href = `https://etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert(borrowed ? "✅ Returned" : "✅ Borrowed");
         } catch (err) {
@@ -132,6 +144,9 @@
       document.getElementById("claimBtn").addEventListener("click", async () => {
         try {
           const tx = await contract.forfeitExpiredDeposits();
+          document.getElementById("adminTxHashSection").style.display = "block"; 
+          document.getElementById("adminTxHash").textContent = tx.hash;
+          document.getElementById("adminTxHash").href = `https://etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert("✅ Expired deposits claimed.");
         } catch (err) {
@@ -145,6 +160,9 @@
         if (!val) return alert("Enter deposit (ETH)");
         try {
           const tx = await contract.setDepositAmount(ethers.utils.parseEther(val));
+          document.getElementById("adminTxHashSection").style.display = "block"; 
+          document.getElementById("adminTxHash").textContent = tx.hash;
+          document.getElementById("adminTxHash").href = `https://etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert("✅ Deposit updated.");
         } catch (err) {
@@ -159,6 +177,9 @@
         try {
           const seconds = parseInt(val);
           const tx = await contract.setBorrowDuration(seconds);
+          document.getElementById("adminTxHashSection").style.display = "block"; 
+          document.getElementById("adminTxHash").textContent = tx.hash;
+          document.getElementById("adminTxHash").href = `https://etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert("✅ Duration updated.");
         } catch (err) {
