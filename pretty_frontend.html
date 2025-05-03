@@ -349,7 +349,9 @@
         qrScanner.clear();
         if (!window.contract) return alert("Connect your wallet first.");
         try {
-          const borrowed = await window.contract.isBorrowed(decodedText);
+          //const borrowed = await window.contract.isBorrowed(decodedText);
+		  const container = await window.contract.containers(decodedText);
+		  const borrowed = container.isBorrowed();
           const tx = borrowed
             ? await window.contract.returnContainer(decodedText)
             : await window.contract.borrowContainer(decodedText, { value: ethers.utils.parseEther("0.001") });
