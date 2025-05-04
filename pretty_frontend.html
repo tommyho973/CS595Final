@@ -252,7 +252,7 @@
             : await window.contract.borrowContainer(decodedText, { value: cost });
 
           document.getElementById("txHash").textContent = tx.hash;
-          document.getElementById("txHash").href        = `https://etherscan.io/tx/${tx.hash}`;
+          document.getElementById("txHash").href        = `https://sepolia.etherscan.io/tx/${tx.hash}`;
 
           await tx.wait();
           alert(borrowed ? "✅ Returned" : "✅ Borrowed");
@@ -284,7 +284,7 @@
           const tx = await contract.forfeitExpiredDeposits();
           document.getElementById("adminTxHashSection").style.display = "block";
           document.getElementById("adminTxHash").textContent          = tx.hash;
-          document.getElementById("adminTxHash").href                 = `https://etherscan.io/tx/${tx.hash}`;
+          document.getElementById("adminTxHash").href                 = `https://sepolia.etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert("✅ Expired deposits claimed.");
         } catch (err) {
@@ -300,7 +300,7 @@
           const tx = await contract.setDepositAmount(ethers.utils.parseEther(val));
           document.getElementById("adminTxHashSection").style.display = "block";
           document.getElementById("adminTxHash").textContent          = tx.hash;
-          document.getElementById("adminTxHash").href                 = `https://etherscan.io/tx/${tx.hash}`;
+          document.getElementById("adminTxHash").href                 = `https://sepolia.etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert("✅ Deposit updated.");
         } catch (err) {
@@ -316,7 +316,7 @@
           const tx = await contract.setBorrowDuration(parseInt(val));
           document.getElementById("adminTxHashSection").style.display = "block";
           document.getElementById("adminTxHash").textContent          = tx.hash;
-          document.getElementById("adminTxHash").href                 = `https://etherscan.io/tx/${tx.hash}`;
+          document.getElementById("adminTxHash").href                 = `https://sepolia.etherscan.io/tx/${tx.hash}`;
           await tx.wait();
           alert("✅ Duration updated.");
         } catch (err) {
