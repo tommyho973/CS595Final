@@ -16,7 +16,7 @@
 
   <!-- QR Scanner & Generator -->
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 </head>
 
 <body class="bg-gray-100 text-gray-900 min-h-screen">
@@ -43,7 +43,7 @@
       </button>
       <p class="mt-3 text-sm">ID: <span id="generatedId" class="font-mono">—</span></p>
       <div class="flex justify-center mt-4">
-        <canvas id="qrcanvas" class="border rounded-lg"></canvas>
+        <div id="qrcanvas" class="border rounded-lg"></div>
       </div>
     </section>
 
@@ -430,18 +430,25 @@
 
       /* ─── QR generation ─────────────────────────────────────────────── */
       document.getElementById("generateQrBtn").addEventListener("click", () => {
+        // Generate a random 12‑character container ID
         const id = Array.from({ length: 12 }, () =>
           "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)]
         ).join("");
         document.getElementById("generatedId").textContent = id;
 
-        const canvas = document.getElementById("qrcanvas");
-        const ctx    = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Clear previous QR (constructor inserts its own <canvas>)
+        const qrWrapper = document.getElementById("qrcanvas");
+        qrWrapper.innerHTML = "";
 
-        QRCode.toCanvas(canvas, id, { width: 256, margin: 1 }, (err) =>
-          err && console.error(err)
-        );
+        // Draw the new QR
+        new QRCode(qrWrapper, {
+          text: id,
+          width: 256,
+          height: 256,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
       });
 
       /* ─── QR scanning & TX flow ─────────────────────────────────────── */
