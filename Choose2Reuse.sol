@@ -54,7 +54,13 @@ contract ChooseToReuse {
         );
 
         container.isBorrowed = false;
-
+        for (uint256 i = 0; i < activeContainerIds.length; i++){
+            if(keccak256(bytes(activeContainerIds[i])) == keccak256(bytes(containerId))){
+                activeContainerIds[i] = activeContainerIds[activeContainerIds.length - 1];
+                activeContainerIds.pop();
+                break;
+            }
+        }
         emit ContainerReturned(containerId, msg.sender);
 
         // Refund deposit
