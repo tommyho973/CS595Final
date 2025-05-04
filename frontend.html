@@ -121,53 +121,269 @@
       /* ─── State ───────────────────────────────────────────────────────── */
       let provider, signer, contract, countdownInterval;
 
-      const contractAddress = "0x4Cfad38aa7F2ecA0A501D42021cc219166180806"; // <‑ change if needed
+      const contractAddress = "0xE1BFda9c9558ce53c55b50D00818B0B40bf9FB24"; // <‑ change if needed
       const contractABI = [
-        /* ── write / admin ── */
-        {
-          "inputs":[{"internalType":"string","name":"containerId","type":"string"}],
-          "name":"borrowContainer","outputs":[],"stateMutability":"payable","type":"function"
-        },
-        {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
-        {
-          "inputs":[{"internalType":"string","name":"containerId","type":"string"}],
-          "name":"returnContainer","outputs":[],"stateMutability":"nonpayable","type":"function"
-        },
-        {"inputs":[],"name":"forfeitExpiredDeposits","outputs":[],"stateMutability":"nonpayable","type":"function"},
-        {
-          "inputs":[{"internalType":"uint256","name":"newAmount","type":"uint256"}],
-          "name":"setDepositAmount","outputs":[],"stateMutability":"nonpayable","type":"function"
-        },
-        {
-          "inputs":[{"internalType":"uint256","name":"newDuration","type":"uint256"}],
-          "name":"setBorrowDuration","outputs":[],"stateMutability":"nonpayable","type":"function"
-        },
-
-        /* ── views ── */
-        {"inputs":[],"name":"depositAmount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-        {"inputs":[],"name":"borrowDuration","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-        {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-        {
-          "inputs":[{"internalType":"string","name":"","type":"string"}],
-          "name":"containers",
-          "outputs":[
-            {"internalType":"bool","name":"isBorrowed","type":"bool"},
-            {"internalType":"address","name":"borrower","type":"address"},
-            {"internalType":"uint256","name":"borrowTimestamp","type":"uint256"}
-          ],
-          "stateMutability":"view","type":"function"
-        },
-        {
-          "inputs":[{"internalType":"string","name":"containerId","type":"string"}],
-          "name":"getDueTimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
-          "stateMutability":"view","type":"function"
-        },
-        {
-          "inputs":[{"internalType":"string","name":"containerId","type":"string"}],
-          "name":"getTimeLeft","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
-          "stateMutability":"view","type":"function"
-        }
-      ];
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			}
+		],
+		"name": "borrowContainer",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "borrower",
+				"type": "address"
+			}
+		],
+		"name": "ContainerBorrowed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "returner",
+				"type": "address"
+			}
+		],
+		"name": "ContainerReturned",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "forfeiter",
+				"type": "address"
+			}
+		],
+		"name": "DepositForfeited",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "forfeitExpiredDeposits",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			}
+		],
+		"name": "returnContainer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newDuration",
+				"type": "uint256"
+			}
+		],
+		"name": "setBorrowDuration",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "setDepositAmount",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "activeContainerIds",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "borrowDuration",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "containers",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "isBorrowed",
+				"type": "bool"
+			},
+			{
+				"internalType": "address",
+				"name": "borrower",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "borrowTimestamp",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "depositAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getActiveContainers",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			}
+		],
+		"name": "getDueTimestamp",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			}
+		],
+		"name": "getTimeLeft",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+  
 
       /* ─── Helpers ────────────────────────────────────────────────────── */
       function startCountdown(seconds) {
