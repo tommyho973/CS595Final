@@ -474,6 +474,14 @@
           await tx.wait();
           alert(borrowed ? "✅ Returned" : "✅ Borrowed");
 
+          // If the transaction was a *return*, stop any running countdown and clear the UI
+          if (borrowed) {
+            document.getElementById("dueDate").textContent  = "—";
+            document.getElementById("timeLeft").textContent = "—";
+            clearInterval(countdownInterval);
+            return;   // nothing else to do
+          }
+
           /* Show / update return deadline */
           try {
             const dueTs    = await window.contract.getDueTimestamp(decodedText);
