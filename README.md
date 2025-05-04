@@ -42,7 +42,7 @@ Blockchain integration: ethers.js
  
 QR scanning: html5-qrcode
  
-QR generation: qrcode.js
+QR generation: (https://www.qr-code-generator.com/) Go to third party link to generate qr code
 
 On-chain:
 
