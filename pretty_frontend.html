@@ -337,16 +337,15 @@
   
       let qrScanner;
       document.getElementById("startScan").addEventListener("click", () => {
-        if (!qrScanner) {
-          qrScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-          qrScanner.render(handleScan);
-        }
+        qrScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        qrScanner.render(handleScan);
       });
       document.getElementById("stopScan").addEventListener("click", () => qrScanner?.clear());
   
       async function handleScan(decodedText) {
         document.getElementById("scanResult").textContent = `Scanned ID: ${decodedText}`;
         qrScanner.clear();
+        qrScanner = null;
         if (!window.contract) return alert("Connect your wallet first.");
         try {
           //const borrowed = await window.contract.isBorrowed(decodedText);
