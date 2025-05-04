@@ -357,7 +357,7 @@
             ? await window.contract.returnContainer(decodedText)
             : await window.contract.borrowContainer(decodedText, { value: cost /*ethers.utils.parseEther("0.001")*/ });
           document.getElementById("txHash").textContent = tx.hash;
-          document.getElementById("txHash").href = `https://etherscan.io/tx/${tx.hash}`;
+          document.getElementById("txHash").href = `https://sepolia.etherscan.io/tx/${tx.hash}`;
 		  let timestamp = parseInt(container.borrowTimestamp.toString(), 10); // Convert BigNumber to Number
   			const borrowDuration = parseInt((await window.contract.borrowDuration()).toString(), 10);  // Convert BigNumber to Number
 		  console.log("Borrow timestamp (in seconds):", timestamp);
