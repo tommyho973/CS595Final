@@ -71,7 +71,7 @@
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
       let provider, signer, contract;
-      const contractAddress = "0x4Cfad38aa7F2ecA0A501D42021cc219166180806";//"0xbEB46B92409316eC320F94dD5710112A326b9a72"; // replace with actual
+      const contractAddress = "0xE1BFda9c9558ce53c55b50D00818B0B40bf9FB24";//"0xbEB46B92409316eC320F94dD5710112A326b9a72"; // replace with actual
       const contractABI = [
 	{
 		"inputs": [
@@ -276,6 +276,44 @@
 				"internalType": "string[]",
 				"name": "",
 				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			}
+		],
+		"name": "getDueTimestamp",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "containerId",
+				"type": "string"
+			}
+		],
+		"name": "getTimeLeft",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
