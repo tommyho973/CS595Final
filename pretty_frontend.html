@@ -351,12 +351,24 @@
         try {
           //const borrowed = await window.contract.isBorrowed(decodedText);
 		  const container = await window.contract.containers(decodedText);
-		  const borrowed = container.isBorrowed();
+		  const borrowed = container.isBorrowed;
+		  const cost = await window.contract.depositAmount();
+		  console.log(cost.toString());
           const tx = borrowed
             ? await window.contract.returnContainer(decodedText)
-            : await window.contract.borrowContainer(decodedText, { value: ethers.utils.parseEther("0.001") });
+            : await window.contract.borrowContainer(decodedText, { value: cost /*ethers.utils.parseEther("0.001")*/ });
           document.getElementById("txHash").textContent = tx.hash;
           document.getElementById("txHash").href = `https://etherscan.io/tx/${tx.hash}`;
+		  let timestamp = parseInt(container.borrowTimestamp.toString(), 10); // Convert BigNumber to Number
+  			const borrowDuration = parseInt((await window.contract.borrowDuration()).toString(), 10);  // Convert BigNumber to Number
+		  console.log("Borrow timestamp (in seconds):", timestamp);
+  		  console.log("Borrow duration (in seconds):", borrowDuration);
+		  timestamp = timestamp + borrowDuration;
+		  const date = new Date(timestamp * 1000);
+		  console.log("Return time (timestamp + borrow duration):", date);
+		  const timestampElement = document.createElement("div");
+		  timestampElement.textContent = `Return: ${date.toLocaleString()}`;
+		  document.getElementById("txHash").parentElement.appendChild(timestampElement);
           await tx.wait();
           alert(borrowed ? "✅ Returned" : "✅ Borrowed");
         } catch (err) {
