@@ -28,6 +28,8 @@ contract ChooseToReuse {
         owner = msg.sender;
     }
 
+    /* ─────────────────── Borrow / Return ─────────────────── */
+
     function borrowContainer(string memory containerId) public payable {
         require(msg.value == depositAmount, "Must pay exact deposit");
         require(!containers[containerId].isBorrowed, "Container already borrowed");
@@ -46,7 +48,10 @@ contract ChooseToReuse {
         Container storage container = containers[containerId];
         require(container.isBorrowed, "Container not borrowed");
         require(container.borrower == msg.sender, "Not the borrower");
-        require(block.timestamp <= container.borrowTimestamp + borrowDuration, "Deposit already forfeited");
+        require(
+            block.timestamp <= container.borrowTimestamp + borrowDuration,
+            "Deposit already forfeited"
+        );
 
         container.isBorrowed = false;
 
@@ -57,15 +62,20 @@ contract ChooseToReuse {
         require(sent, "Refund failed");
     }
 
+    /* ─────────────────── Owner maintenance ─────────────────── */
+
     function forfeitExpiredDeposits() public onlyOwner {
         uint256 i = 0;
         while (i < activeContainerIds.length) {
             string memory containerId = activeContainerIds[i];
             Container storage container = containers[containerId];
 
-            if (container.isBorrowed && block.timestamp > container.borrowTimestamp + borrowDuration) {
+            if (
+                container.isBorrowed &&
+                block.timestamp > container.borrowTimestamp + borrowDuration
+            ) {
                 container.isBorrowed = false;
-                
+
                 emit DepositForfeited(containerId, container.borrower);
 
                 // Transfer deposit to owner
@@ -73,7 +83,8 @@ contract ChooseToReuse {
                 require(sent, "Owner transfer failed");
 
                 // Remove container from activeContainerIds array
-                activeContainerIds[i] = activeContainerIds[activeContainerIds.length - 1];
+                activeContainerIds[i] =
+                    activeContainerIds[activeContainerIds.length - 1];
                 activeContainerIds.pop();
             } else {
                 i++;
@@ -81,9 +92,48 @@ contract ChooseToReuse {
         }
     }
 
+    /* ─────────────────── View helpers ─────────────────── */
+
     function getActiveContainers() public view returns (string[] memory) {
         return activeContainerIds;
     }
+
+    /**
+     * @notice Returns the Unix timestamp by which the specified container
+     *         must be returned (borrowTimestamp + borrowDuration).
+     * @dev    Reverts if the container has never been borrowed.
+     */
+    function getDueTimestamp(string memory containerId)
+        public
+        view
+        returns (uint256)
+    {
+        Container storage container = containers[containerId];
+        require(
+            container.borrowTimestamp != 0,
+            "Container has not been borrowed"
+        );
+        return container.borrowTimestamp + borrowDuration;
+    }
+
+    /**
+     * @notice Returns the number of seconds remaining until the user's
+     *         deposit would be forfeited. If the deadline has passed,
+     *         the function returns 0.
+     */
+    function getTimeLeft(string memory containerId)
+        external
+        view
+        returns (uint256)
+    {
+        uint256 due = getDueTimestamp(containerId);
+        if (block.timestamp >= due) {
+            return 0;
+        }
+        return due - block.timestamp;
+    }
+
+    /* ─────────────────── Admin setters ─────────────────── */
 
     function setDepositAmount(uint256 newAmount) public onlyOwner {
         depositAmount = newAmount;
