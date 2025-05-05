@@ -1,4 +1,4 @@
-# CS595Final
+# CS595 Final Project
 ♻️ Choose to Reuse – Blockchain-based Container Borrow/Return System
 
 A decentralized, trustless system for tracking reusable containers using Ethereum smart contracts, QR codes, and a user-friendly web interface.
@@ -7,7 +7,7 @@ Built with Solidity, MetaMask, ethers.js, and html5-qrcode.
 
 ---
 
-📦 Overview:
+## 📦 Overview:
 
 Single-use packaging creates massive environmental waste, and traditional deposit-return systems struggle with tracking, refunds, and trust.
 
@@ -15,7 +15,7 @@ Choose to Reuse solves this using a smart contract deployed on the Ethereum Sepo
 
 ---
 
-✨ Features:
+## ✨ Features:
 
 🔐 Connect via MetaMask.
 
@@ -32,39 +32,37 @@ Choose to Reuse solves this using a smart contract deployed on the Ethereum Sepo
 
 ---
 
-🏛 Architecture:
+## 🏯 Architecture:
 
-Smart contract: Solidity (deployed on Sepolia testnet).
+- Smart contract: Solidity (deployed on Sepolia testnet).
  
-Front-end: HTML, Tailwind CSS, JS.
+- Front-end: HTML, Tailwind CSS, JS.
  
-Blockchain integration: ethers.js
+- Blockchain integration: ethers.js
  
-QR scanning: html5-qrcode
+- QR scanning: html5-qrcode
  
-QR generation: (https://www.qr-code-generator.com/) Go to third party link to generate qr code
+- QR generation: QRcode.js
 
-On-chain:
+### What's stored On-chain:
 
-containerID → borrower, borrowTimestamp, isBorrowed
+- containerID → borrower, borrowTimestamp, isBorrowed
 
-ETH deposits and refunds
+- ETH deposits and refunds
 
-owner-only admin controls
+- owner-only admin controls
 
-Off-chain:
+### What's done Off-chain:
 
-QR code creation & scanning
+- QR code creation & scanning
 
-MetaMask wallet connection
-
-Admin login UI (username/password or wallet-based)
+- MetaMask wallet connection (which now includes automatic admin page login!)
 
 ---
 
-🚀 Installation & Run Instructions:
+## 🚀 Installation & Run Instructions:
 
-🧑‍💻 Prerequisites:
+### 🧑‍💻 Prerequisites:
 
 1. MetaMask browser extension.
 
@@ -72,83 +70,97 @@ Admin login UI (username/password or wallet-based)
 
 3. Sepolia ETH in your wallet.
 
+### Steps to Run:
+
 🔹 1. Clone the Repository:
 
-bash
+```bash
 git clone https://github.com/yourusername/choose-to-reuse.git
 cd choose-to-reuse
+```
 
-🔹 2. Set Your Smart Contract Address:
+🔹 2. Set Your Smart Contract Address (Optional):
 
-Edit pretty_frontend.html and update this line:
+The program works as intended since we've already deployed the necessary smart contract on the blockchain. However, if you'd like to test admin functionality, you will need to deploy it yourself.
 
-javascript
+Deploy the Smart Contract (via Remix):
+- Open https://remix.ethereum.org
+- Paste in Choose2Reuse.sol
+- Compile (Solidity 0.8.18+)
+- Deploy using “Injected Web3” (MetaMask + Sepolia)
+- Copy the contract address and paste it into the front end (read ahead)
+
+Once the contract is deployed, copy the address and edit pretty_frontend.html by updating this line with your contract address. 
+
+```javascript
 const contractAddress = “0xYOUR_DEPLOYED_ADDRESS_HERE”;
-
+```
 Make sure contractABI includes all functions: borrowContainer, returnContainer, forfeitExpiredDeposits, etc.
+
+NOTE: If you've deployed the contract (i.e your connected wallet address deployed the contract), you are considered the ADMIN and will have access to the admin panel.
 
 🔹 3. Run Locally (Static Server):
 
 You can use any static server (Live Server, http-server, etc.)
 
-Option A – Python:
+Option A – Python (recommended):
 
-bash
+```bash
 python3 -m http.server 8080
+```
 
 Option B – Node.js:
 
-bash
+```bash
 npx http-server .
+```
 
 Then open: http://localhost:8080/pretty_frontend.html
 
-🔹 4. Deploy the Smart Contract (via Remix):
-	•	Open https://remix.ethereum.org
-	•	Paste in Choose2Reuse.sol
-	•	Compile (Solidity 0.8.18+)
-	•	Deploy using “Injected Web3” (MetaMask + Sepolia)
-	•	Copy the contract address and paste it into the front end
-
 🔹 5. Connect Wallet and Test:
-	•	Open the app in your browser
-	•	Click “Connect MetaMask”
-	•	Use the Generate QR and Scanner to borrow and return containers
-	•	Try logging in as “terrier / terrier123” to access admin controls
+- Open the app in your browser
+- Click “Connect MetaMask”
+- Use the Generate QR and Scanner to borrow and return containers
+- Use the admin controls to collect forfeit deposits, update deposit amounts and return duration.
 
 ---
 
-⚙️ Admin Panel
+## ⚙️ Admin Panel (improved post presentation):
 
 The owner can:
-	•	📥 Claim deposits from expired borrows
-	•	💰 Update deposit amount (in ETH)
-	•	⏱ Change borrow duration (in days)
+
+📥 Claim deposits from expired borrows
+
+💰 Update deposit amount (in ETH)
+
+⏱ Change borrow duration (in days)
 
 Compared to the demo version, upgraded version now performs wallet-based verification by checking:
 
-javascript
+```javascript
 await contract.owner() === await signer.getAddress()
 <img width="1029" alt="Screenshot 2025-05-05 at 6 42 23 PM" src="https://github.com/user-attachments/assets/fbded303-10be-473f-9e3d-5c638cd91be5" />
 <img width="1016" alt="Screenshot 2025-05-05 at 6 42 31 PM" src="https://github.com/user-attachments/assets/ece6c047-5794-4586-9a38-802c79039013" />
-
-
----
-
-🧪 Demo Use Cases
-	1.	User borrows a container → contract stores borrow info and deposit
-	2.	User returns the container within deadline → gets full refund
-	3.	User fails to return → after borrowDuration, owner can claim deposit
-	4.	Smart contract enforces everything — no central authority
+```
 
 ---
 
-🛠 Technologies Used
-	•	Solidity
-	•	MetaMask & ethers.js
-	•	html5-qrcode & qrcode.js
-	•	Tailwind CSS
-	•	Remix Ethereum IDE
+## 🧪 Demo Use Case:
+
+- User borrows a container → contract stores borrow info and deposit
+- User returns the container within deadline → gets full refund
+- User fails to return → after borrowDuration, owner can claim deposit
+- Smart contract enforces everything — no central authority
+
+---
+
+## 🛠 Technologies Used:
+
+- Solidity
+- MetaMask & ethers.js
+- html5-qrcode & qrcode.js
+- Tailwind CSS
+- Remix Ethereum IDE
 
 
 
