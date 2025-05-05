@@ -231,14 +231,14 @@
                 <!-- Borrow Duration -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1" for="newDuration">
-                    Borrow Duration
+                  Borrow Duration (seconds)
                   </label>
                   <div class="flex">
                     <input
                       id="newDuration"
                       type="number"
                       min="1"
-                      placeholder="Duration in days"
+                      placeholder="Duration in seconds"
                       class="flex-1 border rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <button
@@ -1081,17 +1081,16 @@
         }
         
         try {
-          // Convert days to seconds (to fit contract parameter)
-          const durationInSeconds = Number(newDuration) * 86400;
-          
+          const durationInSeconds = Number(newDuration);
+            
           const tx = await contract.setBorrowDuration(durationInSeconds);
           setTxStatus(tx.hash, true, true);
           showToast('Updating borrow duration...', 'info');
-          
+            
           await tx.wait();
           setTxStatus(tx.hash, false, true);
           showToast('Borrow duration updated successfully!', 'success');
-          
+            
           await updateContractInfo();
         } catch (error) {
           console.error('Update duration error:', error);
