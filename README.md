@@ -117,6 +117,8 @@ Then open: http://localhost:8080/pretty_frontend.html
 
 <img width="749" alt="Screenshot 2025-05-05 at 7 48 19 PM" src="https://github.com/user-attachments/assets/7f91d89d-1003-40f6-bf1f-5142606519e4" />
 <img width="729" alt="Screenshot 2025-05-05 at 7 48 31 PM" src="https://github.com/user-attachments/assets/1dc92e89-bf3a-49d7-b427-90e4e418609e" />
+<img width="895" alt="Screenshot 2025-05-05 at 7 51 11 PM" src="https://github.com/user-attachments/assets/ad3b21fc-284e-438d-8856-ff19d1b9c17b" />
+<img width="676" alt="Screenshot 2025-05-05 at 7 51 36 PM" src="https://github.com/user-attachments/assets/ba317d6e-63a3-46ee-acf2-2e453d448a9e" />
 
 
 ---
