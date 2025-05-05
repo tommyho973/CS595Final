@@ -136,7 +136,8 @@ javascript
 await contract.owner() === await signer.getAddress()
 <img width="823" alt="Screenshot 2025-05-05 at 7 48 39 PM" src="https://github.com/user-attachments/assets/1f865369-6a3b-4e29-b0fb-b0a309c00be1" />
 <img width="756" alt="Screenshot 2025-05-05 at 7 48 47 PM" src="https://github.com/user-attachments/assets/cd68e994-40bb-4018-9a15-e1523cb6b361" />
-
+<img width="903" alt="Screenshot 2025-05-05 at 7 52 58 PM" src="https://github.com/user-attachments/assets/37f436f3-ee14-40d1-81d4-92e2e6d90ecf" />
+<img width="726" alt="Screenshot 2025-05-05 at 7 53 09 PM" src="https://github.com/user-attachments/assets/54a00dde-a54b-42c4-82a6-5c4ae8dd44c5" />
 
 
 ---
