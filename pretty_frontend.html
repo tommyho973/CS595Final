@@ -1,561 +1,1125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Choose to Reuse DApp</title>
-
-  <!-- Tailwind for styling -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose to Reuse - Sustainable Container System</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- ethers.js (via module) -->
+  
+  <!-- ethers.js -->
   <script type="module">
     import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
     window.ethers = ethers;
   </script>
-
+  
   <!-- QR Scanner & Generator -->
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+  
+  <!-- For icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
-<body class="bg-gray-100 text-gray-900 min-h-screen">
-  <div class="max-w-3xl mx-auto p-6 space-y-10">
-
-    <h1 class="text-3xl font-bold text-center">Choose to Reuse ⚡️</h1>
-
-    <!-- Wallet Connect -->
-    <section class="bg-white rounded-2xl shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">1· Connect Wallet</h2>
-      <button id="connectBtn"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-        Connect MetaMask
-      </button>
-      <p class="mt-3 text-sm">Connected: <span id="walletAddress" class="font-mono">—</span></p>
-    </section>
-
-    <!-- QR Generator -->
-    <section class="bg-white rounded-2xl shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">2· Generate New Container QR</h2>
-      <button id="generateQrBtn"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-        Generate QR
-      </button>
-      <p class="mt-3 text-sm">ID: <span id="generatedId" class="font-mono">—</span></p>
-      <div class="flex justify-center mt-4">
-        <div id="qrcanvas" class="border rounded-lg"></div>
+<body class="bg-gradient-to-br from-green-50 to-teal-100 min-h-screen">
+  <div class="max-w-4xl mx-auto p-4 md:p-8">
+    
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8">
+      <div class="flex items-center mb-4 md:mb-0">
+        <i class="fas fa-recycle text-green-600 text-4xl mr-3"></i>
+        <h1 class="text-3xl font-bold text-green-800">Choose to Reuse</h1>
       </div>
-    </section>
-
-    <!-- QR Scanner -->
-    <section class="bg-white rounded-2xl shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">3· Borrow / Return – Scan Container QR</h2>
-
-      <div id="reader" class="mx-auto" style="width: 300px; height: 300px;"></div>
-
-      <div class="flex gap-4 mt-4">
-        <button id="startScan"
-                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-          Start Scanning
-        </button>
-        <button id="stopScan"
-                class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">
-          Stop Scanning
-        </button>
-      </div>
-
-      <p class="mt-3 text-sm" id="scanResult">Waiting for scan…</p>
-      <p class="mt-3 text-sm">Return by: <span id="dueDate" class="font-mono">—</span></p>
-      <p class="mt-1 text-sm">Time left: <span id="timeLeft" class="font-mono">—</span></p>
-    </section>
-
-    <!-- TX Hash -->
-    <section class="bg-white rounded-2xl shadow p-6">
-      <div class="mt-4 text-sm text-gray-700">
-        Last TX&nbsp;Hash:
-        <a id="txHash" href="#" target="_blank" class="text-blue-600 underline">None</a>
-      </div>
-    </section>
-
-    <!-- Owner Admin Panel -->
-    <section class="bg-white rounded-2xl shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">4· Owner Admin Panel</h2>
-
-      <div id="adminPanel" style="display: none;">
-        <button id="claimBtn"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-          Claim Expired Deposits
-        </button>
-
-        <div class="mt-3">
-          <input id="newDeposit" type="text" placeholder="New deposit (ETH)"
-                 class="border px-2 py-1 rounded" />
-          <button id="updateDepositBtn"
-                  class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-            Update Deposit
-          </button>
+      
+      <!-- Wallet Connection Status -->
+      <div class="flex items-center">
+        <div id="connectionStatus" class="hidden md:flex items-center mr-4">
+          <div id="networkIndicator" class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+          <span id="networkName" class="text-sm text-gray-600">Not Connected</span>
         </div>
-
-        <div class="mt-2">
-          <input id="newDuration" type="number" placeholder="New duration (seconds)"
-                 class="border px-2 py-1 rounded" />
-          <button id="updateDurationBtn"
-                  class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-            Update Duration
-          </button>
+        <button id="connectBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-md flex items-center">
+          <i class="fas fa-wallet mr-2"></i>
+          <span>Connect Wallet</span>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Main Content Tabs -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+      <div class="flex border-b border-gray-200">
+        <button class="tab-btn active px-6 py-3 font-medium text-green-600 border-b-2 border-green-600" data-tab="user">
+          <i class="fas fa-user mr-2"></i>User
+        </button>
+        <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-green-600" data-tab="admin">
+          <i class="fas fa-cog mr-2"></i>Admin
+        </button>
+        <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-green-600" data-tab="info">
+          <i class="fas fa-info-circle mr-2"></i>Info
+        </button>
+      </div>
+      
+      <!-- Tab Content -->
+      <div class="p-6">
+        <!-- User Tab (Default) -->
+        <div id="user-tab" class="tab-content">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- QR Generator -->
+            <div class="bg-green-50 p-5 rounded-xl">
+              <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-qrcode text-green-600 mr-2"></i>
+                Generate Container QR
+              </h2>
+              <button id="generateQrBtn" class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow mb-4">
+                Generate New Container ID
+              </button>
+              
+              <div class="mt-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-700">Container ID:</span>
+                  <span id="generatedId" class="font-mono text-sm bg-white px-2 py-1 rounded border">—</span>
+                </div>
+                <div id="qrcanvas" class="flex justify-center border rounded-lg bg-white p-4"></div>
+                <div class="mt-3 text-center">
+                  <button id="downloadQrBtn" class="text-sm px-3 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition hidden">
+                    <i class="fas fa-download mr-1"></i> Download QR
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- QR Scanner -->
+            <div class="bg-blue-50 p-5 rounded-xl">
+              <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-camera text-blue-600 mr-2"></i>
+                Borrow / Return Container
+              </h2>
+              
+              <div id="reader" class="w-full h-64 bg-gray-100 rounded-lg mb-4 overflow-hidden"></div>
+              
+              <div class="flex gap-2 mb-4">
+                <button id="startScan" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow">
+                  <i class="fas fa-camera mr-1"></i> Start Scan
+                </button>
+                <button id="stopScan" class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition shadow">
+                  <i class="fas fa-stop mr-1"></i> Stop
+                </button>
+              </div>
+              
+              <div class="bg-white p-3 rounded-lg border">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-700">Status:</span>
+                  <span id="containerStatus" class="text-sm font-medium">Not scanned</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-700">Container ID:</span>
+                  <span id="scanResult" class="font-mono text-sm">—</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-700">Return by:</span>
+                  <span id="dueDate" class="text-sm">—</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium text-gray-700">Time left:</span>
+                  <span id="timeLeft" class="text-sm font-medium">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Transaction Status -->
+          <div class="mt-6 bg-gray-50 rounded-xl p-4">
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Transaction Status</h3>
+            
+            <div id="txStatusContainer" class="hidden bg-white p-3 rounded-lg border">
+              <div class="flex items-center mb-2">
+                <div id="txStatusIcon" class="mr-2 text-yellow-500">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <span id="txStatusText" class="font-medium">Processing transaction...</span>
+              </div>
+              <div class="text-sm text-gray-600">
+                TX Hash: 
+                <a id="txHash" href="#" target="_blank" class="text-blue-600 underline font-mono text-xs break-all">—</a>
+              </div>
+            </div>
+            
+            <div id="noTxContainer" class="bg-white p-3 rounded-lg border text-center text-gray-500">
+              No recent transactions
+            </div>
+          </div>
+        </div>
+        
+        <!-- Admin Tab -->
+        <div id="admin-tab" class="tab-content hidden">
+          <div id="adminAuthContainer" class="text-center py-8">
+            <i class="fas fa-lock text-gray-400 text-5xl mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-700 mb-4">Admin Authentication Required</h3>
+            <p class="text-gray-500 mb-6">Only the contract owner can access admin features.</p>
+            <button id="adminAuthBtn" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow">
+              Authenticate as Owner
+            </button>
+          </div>
+          
+          <div id="adminPanelContainer" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <!-- Contract Info -->
+              <div class="bg-gray-50 p-5 rounded-xl">
+                <h3 class="text-lg font-medium text-gray-700 mb-4">Contract Information</h3>
+                
+                <div class="bg-white p-3 rounded-lg border">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Owner:</span>
+                    <span id="contractOwner" class="font-mono text-xs text-gray-600 break-all">—</span>
+                  </div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Deposit Amount:</span>
+                    <span id="depositAmount" class="text-sm">—</span>
+                  </div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Borrow Duration:</span>
+                    <span id="borrowDuration" class="text-sm">—</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">Active Containers:</span>
+                    <span id="activeContainers" class="text-sm">—</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Claim Expired Deposits -->
+              <div class="bg-red-50 p-5 rounded-xl">
+                <h3 class="text-lg font-medium text-gray-700 mb-4">Claim Expired Deposits</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                  Claim deposits for containers that were not returned within the allowed time period.
+                </p>
+                <button id="claimBtn" class="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow">
+                  <i class="fas fa-hand-holding-usd mr-2"></i>
+                  Claim Expired Deposits
+                </button>
+              </div>
+            </div>
+            
+            <!-- Contract Settings -->
+            <div class="bg-indigo-50 p-5 rounded-xl">
+              <h3 class="text-lg font-medium text-gray-700 mb-4">Contract Settings</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Deposit Amount -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1" for="newDeposit">
+                    Deposit Amount (ETH)
+                  </label>
+                  <div class="flex">
+                    <input
+                      id="newDeposit"
+                      type="number"
+                      step="0.0001"
+                      min="0"
+                      placeholder="e.g., 0.001"
+                      class="flex-1 border rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      id="updateDepositBtn"
+                      class="bg-indigo-600 text-white px-4 py-2 rounded-r hover:bg-indigo-700"
+                    >
+                      Update
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Borrow Duration -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1" for="newDuration">
+                    Borrow Duration
+                  </label>
+                  <div class="flex">
+                    <input
+                      id="newDuration"
+                      type="number"
+                      min="1"
+                      placeholder="Duration in days"
+                      class="flex-1 border rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      id="updateDurationBtn"
+                      class="bg-indigo-600 text-white px-4 py-2 rounded-r hover:bg-indigo-700"
+                    >
+                      Update
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Admin Transaction Status -->
+            <div id="adminTxStatusContainer" class="hidden mt-6 bg-white p-3 rounded-lg border">
+              <div class="flex items-center mb-2">
+                <div id="adminTxStatusIcon" class="mr-2 text-yellow-500">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <span id="adminTxStatusText" class="font-medium">Processing admin transaction...</span>
+              </div>
+              <div class="text-sm text-gray-600">
+                TX Hash: 
+                <a id="adminTxHash" href="#" target="_blank" class="text-blue-600 underline font-mono text-xs break-all">—</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Info Tab -->
+        <div id="info-tab" class="tab-content hidden">
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-3 text-green-800">♻️ Choose to Reuse System</h2>
+            <p class="text-gray-700 mb-4">
+              A decentralized, trustless system for tracking reusable containers using Ethereum smart contracts,
+              QR codes, and a user-friendly web interface. Reduce waste by participating in this container
+              borrowing system!
+            </p>
+            
+            <h3 class="text-lg font-medium mb-2 text-green-700">How It Works:</h3>
+            <ol class="list-decimal list-inside text-gray-700 space-y-2 mb-6">
+              <li><strong>Generate:</strong> Create and print a unique QR code for your container</li>
+              <li><strong>Borrow:</strong> Users scan the QR code and pay a deposit to borrow the container</li>
+              <li><strong>Use:</strong> The borrower uses the container for their needs</li>
+              <li><strong>Return:</strong> The container is returned by scanning the QR code again</li>
+              <li><strong>Refund:</strong> The deposit is automatically refunded when returned on time</li>
+            </ol>
+            
+            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <h3 class="text-md font-medium mb-2 text-yellow-800">
+                <i class="fas fa-exclamation-triangle mr-2"></i>Important Notes:
+              </h3>
+              <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+                <li>Users must return containers before the deadline to receive their deposit back</li>
+                <li>Late returns result in forfeited deposits</li>
+                <li>The smart contract automatically handles all transactions</li>
+                <li>This dApp is running on the Sepolia testnet</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="bg-white p-4 rounded-lg border">
+            <h3 class="text-lg font-medium mb-3 text-gray-700">Contract Details</h3>
+            <div class="flex flex-col space-y-2">
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-700">Network:</span>
+                <span class="text-sm">Ethereum Sepolia Testnet</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-700">Contract Address:</span>
+                <div class="flex items-center">
+                  <span id="contractAddressDisplay" class="font-mono text-xs text-gray-600 mr-2">—</span>
+                  <button id="copyAddressBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-700">View on Etherscan:</span>
+                <a id="etherscanLink" href="#" target="_blank" class="text-blue-600 hover:underline text-sm">
+                  <i class="fas fa-external-link-alt mr-1"></i>Open
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Admin TX Hash -->
-      <div id="adminTxHashSection" class="mt-4 text-sm text-gray-700" style="display: none;">
-        Admin TX&nbsp;Hash:
-        <a id="adminTxHash" href="#" target="_blank" class="text-blue-600 underline">None</a>
-      </div>
-    </section>
-
-  </div>
-
-  <!-- JavaScript Logic -->
-  <script defer>
-    document.addEventListener("DOMContentLoaded", () => {
-      /* ─── State ───────────────────────────────────────────────────────── */
-      let provider, signer, contract, countdownInterval;
-
-      const contractAddress = "0xE1BFda9c9558ce53c55b50D00818B0B40bf9FB24"; // <‑ change if needed
-      const contractABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			}
-		],
-		"name": "borrowContainer",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "borrower",
-				"type": "address"
-			}
-		],
-		"name": "ContainerBorrowed",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "returner",
-				"type": "address"
-			}
-		],
-		"name": "ContainerReturned",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "forfeiter",
-				"type": "address"
-			}
-		],
-		"name": "DepositForfeited",
-		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "forfeitExpiredDeposits",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			}
-		],
-		"name": "returnContainer",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newDuration",
-				"type": "uint256"
-			}
-		],
-		"name": "setBorrowDuration",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newAmount",
-				"type": "uint256"
-			}
-		],
-		"name": "setDepositAmount",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "activeContainerIds",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "borrowDuration",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "containers",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "isBorrowed",
-				"type": "bool"
-			},
-			{
-				"internalType": "address",
-				"name": "borrower",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "borrowTimestamp",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "depositAmount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getActiveContainers",
-		"outputs": [
-			{
-				"internalType": "string[]",
-				"name": "",
-				"type": "string[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			}
-		],
-		"name": "getDueTimestamp",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "containerId",
-				"type": "string"
-			}
-		],
-		"name": "getTimeLeft",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
-];
+    </div>
+    
+    <!-- Footer -->
+    <footer class="text-center text-gray-600 text-sm mb-8">
+      <p>♻️ Choose to Reuse - Blockchain-based Container Borrow/Return System</p>
+      <p class="mt-1">
+        <a href="https://github.com/tommyho973/CS595Final" target="_blank" class="text-green-600 hover:underline">
+          <i class="fab fa-github mr-1"></i>View on GitHub
+        </a>
+      </p>
+    </footer>
   
+  </div>
+  
+  <!-- Toast Messages -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+    <i id="toastIcon" class="mr-2"></i>
+    <span id="toastMessage"></span>
+  </div>
+  
+  <!-- JavaScript -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      /* ─────────────────────── State Variables ───────────────────────── */
+      let provider, signer, contract, countdownInterval;
+      let isOwner = false;
+      
+      const contractAddress = "0xE1BFda9c9558ce53c55b50D00818B0B40bf9FB24"; // Choose2Reuse contract address
+      const contractABI = [
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            }
+          ],
+          "name": "borrowContainer",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "borrower",
+              "type": "address"
+            }
+          ],
+          "name": "ContainerBorrowed",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "returner",
+              "type": "address"
+            }
+          ],
+          "name": "ContainerReturned",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "forfeiter",
+              "type": "address"
+            }
+          ],
+          "name": "DepositForfeited",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "forfeitExpiredDeposits",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            }
+          ],
+          "name": "returnContainer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "newDuration",
+              "type": "uint256"
+            }
+          ],
+          "name": "setBorrowDuration",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "newAmount",
+              "type": "uint256"
+            }
+          ],
+          "name": "setDepositAmount",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "activeContainerIds",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "borrowDuration",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "name": "containers",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "isBorrowed",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "borrower",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "borrowTimestamp",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "depositAmount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "getActiveContainers",
+          "outputs": [
+            {
+              "internalType": "string[]",
+              "name": "",
+              "type": "string[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            }
+          ],
+          "name": "getDueTimestamp",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "containerId",
+              "type": "string"
+            }
+          ],
+          "name": "getTimeLeft",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ];
+      
+      /* ────────────────────── Setup UI References ─────────────────────── */
+      document.getElementById('contractAddressDisplay').textContent = contractAddress;
+      document.getElementById('etherscanLink').href = `https://sepolia.etherscan.io/address/${contractAddress}`;
+      
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach(b => b.classList.remove('active', 'text-green-600', 'border-b-2', 'border-green-600'));
+          tabBtns.forEach(b => b.classList.add('text-gray-500'));
+          tabContents.forEach(c => c.classList.add('hidden'));
 
-      /* ─── Helpers ────────────────────────────────────────────────────── */
+          btn.classList.add('active', 'text-green-600', 'border-b-2', 'border-green-600');
+          btn.classList.remove('text-gray-500');
+          
+          const tabId = btn.dataset.tab;
+          document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+        });
+      });
+      
+      /* ──────────────────────── Helper Functions ───────────────────────── */
+      function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+        
+        toastMessage.textContent = message;
+
+        if (type === 'success') {
+          toastIcon.className = 'fas fa-check-circle text-green-400 mr-2';
+        } else if (type === 'error') {
+          toastIcon.className = 'fas fa-exclamation-circle text-red-400 mr-2';
+        } else {
+          toastIcon.className = 'fas fa-info-circle text-blue-400 mr-2';
+        }
+        
+        // Show toast
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        
+        // Hide after 3 sec
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+      }
+      
+      function formatTimeLeft(seconds) {
+        if (seconds <= 0) {
+          return "Expired";
+        }
+        
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        
+        let result = "";
+        if (days > 0) result += `${days}d `;
+        if (hours > 0 || days > 0) result += `${hours}h `;
+        if (minutes > 0 || hours > 0 || days > 0) result += `${minutes}m `;
+        result += `${secs}s`;
+        
+        return result;
+      }
+      
       function startCountdown(seconds) {
         clearInterval(countdownInterval);
+        const timeLeftElement = document.getElementById('timeLeft');
+        
         function update() {
           if (seconds <= 0) {
-            document.getElementById("timeLeft").textContent = "Deadline passed";
+            timeLeftElement.textContent = "Expired";
+            timeLeftElement.classList.remove('text-green-600');
+            timeLeftElement.classList.add('text-red-600');
             clearInterval(countdownInterval);
             return;
           }
-          const h = Math.floor(seconds / 3600);
-          const m = Math.floor((seconds % 3600) / 60);
-          const s = seconds % 60;
-          document.getElementById("timeLeft").textContent = `${h}h ${m}m ${s}s`;
+          
+          timeLeftElement.textContent = formatTimeLeft(seconds);
+          
+          // Update color via time left 
+          if (seconds < 86400) { // Less than 1 day
+            timeLeftElement.classList.remove('text-green-600');
+            timeLeftElement.classList.add('text-yellow-600');
+            
+            if (seconds < 3600) { // Less than 1 hour
+              timeLeftElement.classList.remove('text-yellow-600');
+              timeLeftElement.classList.add('text-red-600');
+            }
+          } else {
+            timeLeftElement.classList.remove('text-yellow-600', 'text-red-600');
+            timeLeftElement.classList.add('text-green-600');
+          }
+          
           seconds--;
         }
+        
         update();
         countdownInterval = setInterval(update, 1000);
       }
-
-      /* ─── MetaMask connect ──────────────────────────────────────────── */
-      document.getElementById("connectBtn").addEventListener("click", async () => {
-        if (!window.ethereum) return alert("MetaMask not detected");
+      
+      // Used through out all functions, displays accurate contract info in UI
+      async function updateContractInfo() {
+        if (!contract) return;
+        
         try {
-          await ethereum.request({ method: "eth_requestAccounts" });
-
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          signer   = provider.getSigner();
-          contract = new ethers.Contract(contractAddress, contractABI, signer);
-          window.contract = contract;      // expose for handlers that use window.contract
-
-          const userAddress  = await signer.getAddress();
+          // Get owner address
           const ownerAddress = await contract.owner();
-          document.getElementById("walletAddress").textContent = userAddress;
-
-          if (userAddress.toLowerCase() === ownerAddress.toLowerCase()) {
-            document.getElementById("adminPanel").style.display = "block";
+          document.getElementById('contractOwner').textContent = ownerAddress;
+          
+          // Get deposit amount
+          const depositAmount = await contract.depositAmount();
+          document.getElementById('depositAmount').textContent = `${ethers.utils.formatEther(depositAmount)} ETH`;
+          
+          // Get borrow duration
+          const borrowDuration = await contract.borrowDuration();
+          const durationDays = Math.floor(Number(borrowDuration) / 86400);
+          document.getElementById('borrowDuration').textContent = `${durationDays} days (${borrowDuration} seconds)`;
+          
+          // Get active containers
+          const activeContainers = await contract.getActiveContainers();
+          document.getElementById('activeContainers').textContent = activeContainers.length;
+          
+        } catch (error) {
+          console.error("Error updating contract info:", error);
+        }
+      }
+      
+      function setTxStatus(hash, pending = true, isAdmin = false) {
+        const statusContainer = isAdmin ? 'adminTxStatusContainer' : 'txStatusContainer';
+        const statusIcon = isAdmin ? 'adminTxStatusIcon' : 'txStatusIcon';
+        const statusText = isAdmin ? 'adminTxStatusText' : 'txStatusText';
+        const txHashElement = isAdmin ? 'adminTxHash' : 'txHash';
+        const noTxContainer = !isAdmin ? 'noTxContainer' : '';
+        
+        document.getElementById(statusContainer).classList.remove('hidden');
+        if (noTxContainer) document.getElementById(noTxContainer).classList.add('hidden');
+        
+        if (pending) {
+          document.getElementById(statusIcon).innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          document.getElementById(statusIcon).className = 'mr-2 text-yellow-500';
+          document.getElementById(statusText).textContent = 'Processing transaction...';
+          document.getElementById(statusText).className = 'font-medium text-yellow-700';
+        } else {
+          document.getElementById(statusIcon).innerHTML = '<i class="fas fa-check-circle"></i>';
+          document.getElementById(statusIcon).className = 'mr-2 text-green-500';
+          document.getElementById(statusText).textContent = 'Transaction confirmed!';
+          document.getElementById(statusText).className = 'font-medium text-green-700';
+        }
+        
+        document.getElementById(txHashElement).textContent = hash;
+        document.getElementById(txHashElement).href = `https://sepolia.etherscan.io/tx/${hash}`;
+      }
+      
+      async function checkContainerStatus(containerId) {
+        try {
+          const container = await contract.containers(containerId);
+          const statusElement = document.getElementById('containerStatus');
+          
+          if (container.isBorrowed) {
+            if (container.borrower.toLowerCase() === (await signer.getAddress()).toLowerCase()) {
+              statusElement.textContent = 'Borrowed by you';
+              statusElement.className = 'text-sm font-medium text-blue-600';
+            } else {
+              statusElement.textContent = 'Borrowed by someone else';
+              statusElement.className = 'text-sm font-medium text-red-600';
+            }
+            
+            try {
+              const dueTs = await contract.getDueTimestamp(containerId);
+              const secsLeft = await contract.getTimeLeft(containerId);
+              
+              const date = new Date(Number(dueTs.toString()) * 1000);
+              document.getElementById('dueDate').textContent = date.toLocaleString();
+              startCountdown(Number(secsLeft.toString()));
+            } catch (err) {
+              document.getElementById('dueDate').textContent = '—';
+              document.getElementById('timeLeft').textContent = '—';
+              console.error("Error getting time info:", err);
+            }
+          } else {
+            statusElement.textContent = 'Available';
+            statusElement.className = 'text-sm font-medium text-green-600';
+            document.getElementById('dueDate').textContent = '—';
+            document.getElementById('timeLeft').textContent = '—';
           }
-        } catch (err) {
-          console.error(err);
-          alert(err.message || "Connection failed");
+        } catch (error) {
+          console.error("Error checking container status:", error);
+          const statusElement = document.getElementById('containerStatus');
+          statusElement.textContent = 'Error checking status';
+          statusElement.className = 'text-sm font-medium text-red-600';
+        }
+      }
+      
+      /* ───────────────────── MetaMask Connection ────────────────────────── */
+      document.getElementById('connectBtn').addEventListener('click', async () => {
+        if (!window.ethereum) {
+          showToast('MetaMask not detected. Please install it to use this dApp.', 'error');
+          return;
+        }
+        
+        try {
+          // Request accounts
+          const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+          
+          // Initialize providers
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          contract = new ethers.Contract(contractAddress, contractABI, signer);
+          
+          // Get network name
+          const network = await provider.getNetwork();
+          let networkName = 'Unknown Network';
+          
+          if (network.chainId === 11155111) {
+            networkName = 'Sepolia Testnet';
+            document.getElementById('networkIndicator').classList.remove('bg-red-500');
+            document.getElementById('networkIndicator').classList.add('bg-green-500');
+          } else {
+            networkName = `Chain ID: ${network.chainId}`;
+            document.getElementById('networkIndicator').classList.remove('bg-green-500');
+            document.getElementById('networkIndicator').classList.add('bg-yellow-500');
+            showToast('Please switch to Sepolia Testnet', 'error');
+          }
+          
+          document.getElementById('networkName').textContent = networkName;
+          document.getElementById('connectionStatus').classList.remove('hidden');
+          
+          // Get user address
+          const userAddress = await signer.getAddress();
+          const displayAddress = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+          document.getElementById('connectBtn').innerHTML = `<i class="fas fa-wallet mr-2"></i>${displayAddress}`;
+          
+          // Check if user is owner
+          const ownerAddress = await contract.owner();
+          isOwner = (ownerAddress.toLowerCase() === userAddress.toLowerCase());
+          
+          await updateContractInfo();
+          
+          showToast('Wallet connected successfully!', 'success');
+        } catch (error) {
+          console.error('Connection error:', error);
+          showToast('Failed to connect: ' + (error.message || 'Unknown error'), 'error');
         }
       });
-
-      /* ─── QR generation ─────────────────────────────────────────────── */
-      document.getElementById("generateQrBtn").addEventListener("click", () => {
-        // Generate a random 12‑character container ID
+      
+      /* ──────────────────────── QR Generation ──────────────────────────── */
+      document.getElementById('generateQrBtn').addEventListener('click', () => {
+        // Generate container ID
         const id = Array.from({ length: 12 }, () =>
           "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)]
         ).join("");
-        document.getElementById("generatedId").textContent = id;
+        
+        document.getElementById('generatedId').textContent = id;
 
-        // Clear previous QR (constructor inserts its own <canvas>)
-        const qrWrapper = document.getElementById("qrcanvas");
-        qrWrapper.innerHTML = "";
-
-        // Draw the new QR
+        const qrWrapper = document.getElementById('qrcanvas');
+        qrWrapper.innerHTML = '';
+        
+        // Show new QR
         new QRCode(qrWrapper, {
           text: id,
-          width: 256,
-          height: 256,
+          width:
+ 212,
+          height: 212,
           colorDark: "#000000",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.H
         });
+        
+        // Once generated, show download button
+        document.getElementById('downloadQrBtn').classList.remove('hidden');
       });
-
-      /* ─── QR scanning & TX flow ─────────────────────────────────────── */
+      
+      // QR Download
+      document.getElementById('downloadQrBtn').addEventListener('click', () => {
+        const canvas = document.querySelector('#qrcanvas canvas');
+        if (!canvas) return;
+        
+        const containerId = document.getElementById('generatedId').textContent;
+        const link = document.createElement('a');
+        link.download = `container-${containerId}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+      
+      /* ────────────────────────── QR Scanning ──────────────────────────── */
       let qrScanner;
-      document.getElementById("startScan").addEventListener("click", () => {
-        qrScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-        qrScanner.render(handleScan);
+      
+      document.getElementById('startScan').addEventListener('click', () => {
+        if (!contract) {
+          showToast('Please connect your wallet first', 'error');
+          return;
+        }
+        
+        document.getElementById('scanResult').textContent = '—';
+        document.getElementById('containerStatus').textContent = 'Scanning...';
+        document.getElementById('containerStatus').className = 'text-sm font-medium text-gray-600';
+        
+        qrScanner = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        
+        qrScanner.start(
+          { facingMode: "environment" }, 
+          config,
+          handleScan
+        );
       });
-      document.getElementById("stopScan").addEventListener("click", () => qrScanner?.clear());
-
+      
+      document.getElementById('stopScan').addEventListener('click', () => {
+        if (qrScanner) {
+          qrScanner.stop().then(() => {
+            console.log('QR scanner stopped');
+          }).catch(err => {
+            console.error('Failed to stop scanner:', err);
+          });
+          qrScanner = null;
+        }
+      });
+      
       async function handleScan(decodedText) {
-        document.getElementById("scanResult").textContent = `Scanned ID: ${decodedText}`;
-        qrScanner.clear(); qrScanner = null;
-
-        if (!window.contract) return alert("Connect your wallet first.");
+        if (!contract) {
+          showToast('Wallet not connected', 'error');
+          return;
+        }
+        
+        // Scan until a valid QR code is detected
+        if (qrScanner) {
+          await qrScanner.stop();
+          qrScanner = null;
+        }
+        
+        document.getElementById('scanResult').textContent = decodedText;
+        
         try {
-          /* Is it already borrowed? */
-          const container = await window.contract.containers(decodedText);
-          const borrowed  = container.isBorrowed;
-
-          /* Borrow or return */
-          const cost = await window.contract.depositAmount();
-          const tx   = borrowed
-            ? await window.contract.returnContainer(decodedText)
-            : await window.contract.borrowContainer(decodedText, { value: cost });
-
-          document.getElementById("txHash").textContent = tx.hash;
-          document.getElementById("txHash").href        = `https://sepolia.etherscan.io/tx/${tx.hash}`;
-
+          const container = await contract.containers(decodedText);
+          const isBorrowed = container.isBorrowed;
+          
+          await checkContainerStatus(decodedText);
+          const depositAmount = await contract.depositAmount();
+          
+          // Transaction for borrow or return
+          let tx;
+          if (isBorrowed) {
+            // Check if the user is the borrower
+            const userAddress = await signer.getAddress();
+            if (container.borrower.toLowerCase() !== userAddress.toLowerCase()) {
+              showToast('You can only return containers that you borrowed', 'error');
+              return;
+            }
+            
+            // Return container
+            tx = await contract.returnContainer(decodedText);
+            showToast('Returning container...', 'info');
+          } else {
+            // Borrow container
+            tx = await contract.borrowContainer(decodedText, { value: depositAmount });
+            showToast(`Borrowing container (deposit: ${ethers.utils.formatEther(depositAmount)} ETH)...`, 'info');
+          }
+          
+          // Update UI with transaction status
+          setTxStatus(tx.hash, true);
+          
+          // Wait for transaction confirmation
           await tx.wait();
-          alert(borrowed ? "✅ Returned" : "✅ Borrowed");
-
-          // If the transaction was a *return*, stop any running countdown and clear the UI
-          if (borrowed) {
-            document.getElementById("dueDate").textContent  = "—";
-            document.getElementById("timeLeft").textContent = "—";
-            clearInterval(countdownInterval);
-            return;   // nothing else to do
-          }
-
-          /* Show / update return deadline */
-          try {
-            const dueTs    = await window.contract.getDueTimestamp(decodedText);
-            const secsLeft = await window.contract.getTimeLeft(decodedText);
-
-            const date = new Date(Number(dueTs.toString()) * 1000);
-            document.getElementById("dueDate").textContent = date.toLocaleString();
-            startCountdown(Number(secsLeft.toString()));
-          } catch {
-            /* Not borrowed → clear */
-            document.getElementById("dueDate").textContent = "—";
-            document.getElementById("timeLeft").textContent = "—";
-            clearInterval(countdownInterval);
-          }
-
-        } catch (err) {
-          console.error(err);
-          alert(err.error?.message || err.message || "Transaction failed");
+          setTxStatus(tx.hash, false);
+          
+          await checkContainerStatus(decodedText);
+          // Before tell user container status
+          showToast(isBorrowed ? 'Container returned successfully!' : 'Container borrowed successfully!', 'success');
+          
+        } catch (error) {
+          console.error('Transaction error:', error);
+          showToast('Transaction failed: ' + (error.reason || error.message || 'Unknown error'), 'error');
         }
       }
-
-      /* ─── Admin actions ─────────────────────────────────────────────── */
-      document.getElementById("claimBtn").addEventListener("click", async () => {
+      
+      /* ───────────────────── Admin Panel ────────────────────────── */
+      document.getElementById('adminAuthBtn').addEventListener('click', async () => {
+        if (!contract) {
+          showToast('Please connect your wallet first', 'error');
+          return;
+        }
+        
+        try {
+          const ownerAddress = await contract.owner();
+          const userAddress = await signer.getAddress();
+          
+          if (ownerAddress.toLowerCase() === userAddress.toLowerCase()) {
+            isOwner = true;
+            document.getElementById('adminAuthContainer').classList.add('hidden');
+            document.getElementById('adminPanelContainer').classList.remove('hidden');
+            showToast('Admin access granted!', 'success');
+          } else {
+            showToast('Only the contract owner can access admin features', 'error');
+          }
+        } catch (error) {
+          console.error('Admin authentication error:', error);
+          showToast('Authentication failed', 'error');
+        }
+      });
+      
+      // Claim expired deposits
+      document.getElementById('claimBtn').addEventListener('click', async () => {
+        if (!contract || !isOwner) {
+          showToast('Admin access required', 'error');
+          return;
+        }
+        
         try {
           const tx = await contract.forfeitExpiredDeposits();
-          document.getElementById("adminTxHashSection").style.display = "block";
-          document.getElementById("adminTxHash").textContent          = tx.hash;
-          document.getElementById("adminTxHash").href                 = `https://sepolia.etherscan.io/tx/${tx.hash}`;
+          setTxStatus(tx.hash, true, true);
+          showToast('Claiming expired deposits...', 'info');
+          
           await tx.wait();
-          alert("✅ Expired deposits claimed.");
-        } catch (err) {
-          console.error(err);
-          alert(err.error?.message || err.message || "Transaction failed");
+          setTxStatus(tx.hash, false, true);
+          showToast('Expired deposits claimed successfully!', 'success');
+          
+          await updateContractInfo();
+        } catch (error) {
+          console.error('Claim error:', error);
+          showToast('Failed to claim: ' + (error.reason || error.message || 'Unknown error'), 'error');
         }
       });
-
-      document.getElementById("updateDepositBtn").addEventListener("click", async () => {
-        const val = document.getElementById("newDeposit").value;
-        if (!val) return alert("Enter deposit (ETH)");
+      
+      document.getElementById('updateDepositBtn').addEventListener('click', async () => {
+        if (!contract || !isOwner) {
+          showToast('Admin access required', 'error');
+          return;
+        }
+        
+        const newDeposit = document.getElementById('newDeposit').value;
+        if (!newDeposit) {
+          showToast('Please enter a valid deposit amount', 'error');
+          return;
+        }
+        
         try {
-          const tx = await contract.setDepositAmount(ethers.utils.parseEther(val));
-          document.getElementById("adminTxHashSection").style.display = "block";
-          document.getElementById("adminTxHash").textContent          = tx.hash;
-          document.getElementById("adminTxHash").href                 = `https://sepolia.etherscan.io/tx/${tx.hash}`;
+          const tx = await contract.setDepositAmount(ethers.utils.parseEther(newDeposit));
+          setTxStatus(tx.hash, true, true);
+          showToast('Updating deposit amount...', 'info');
+          
           await tx.wait();
-          alert("✅ Deposit updated.");
-        } catch (err) {
-          console.error(err);
-          alert(err.error?.message || err.message || "Transaction failed");
+          setTxStatus(tx.hash, false, true);
+          showToast('Deposit amount updated successfully!', 'success');
+          
+          await updateContractInfo();
+        } catch (error) {
+          console.error('Update deposit error:', error);
+          showToast('Failed to update: ' + (error.reason || error.message || 'Unknown error'), 'error');
         }
       });
-
-      document.getElementById("updateDurationBtn").addEventListener("click", async () => {
-        const val = document.getElementById("newDuration").value;
-        if (!val) return alert("Enter duration (seconds)");
+      
+      // Update borrow duration
+      document.getElementById('updateDurationBtn').addEventListener('click', async () => {
+        if (!contract || !isOwner) {
+          showToast('Admin access required', 'error');
+          return;
+        }
+        
+        const newDuration = document.getElementById('newDuration').value;
+        if (!newDuration) {
+          showToast('Please enter a valid duration', 'error');
+          return;
+        }
+        
         try {
-          const tx = await contract.setBorrowDuration(parseInt(val));
-          document.getElementById("adminTxHashSection").style.display = "block";
-          document.getElementById("adminTxHash").textContent          = tx.hash;
-          document.getElementById("adminTxHash").href                 = `https://sepolia.etherscan.io/tx/${tx.hash}`;
+          // Convert days to seconds (to fit contract parameter)
+          const durationInSeconds = Number(newDuration) * 86400;
+          
+          const tx = await contract.setBorrowDuration(durationInSeconds);
+          setTxStatus(tx.hash, true, true);
+          showToast('Updating borrow duration...', 'info');
+          
           await tx.wait();
-          alert("✅ Duration updated.");
-        } catch (err) {
-          console.error(err);
-          alert(err.error?.message || err.message || "Transaction failed");
+          setTxStatus(tx.hash, false, true);
+          showToast('Borrow duration updated successfully!', 'success');
+          
+          await updateContractInfo();
+        } catch (error) {
+          console.error('Update duration error:', error);
+          showToast('Failed to update: ' + (error.reason || error.message || 'Unknown error'), 'error');
         }
       });
+      
+      // Copy contract address
+      document.getElementById('copyAddressBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(contractAddress).then(() => {
+          showToast('Contract address copied to clipboard', 'success');
+        }).catch(err => {
+          console.error('Could not copy address:', err);
+          showToast('Failed to copy address', 'error');
+        });
+      });
+      
+      // Listen for network changes
+      if (window.ethereum) {
+        ethereum.on('chainChanged', () => {
+          window.location.reload();
+        });
+        
+        ethereum.on('accountsChanged', () => {
+          window.location.reload();
+        });
+      }
     });
   </script>
 </body>
