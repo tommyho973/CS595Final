@@ -129,6 +129,9 @@ Compared to the demo version, upgraded version now performs wallet-based verific
 
 javascript
 await contract.owner() === await signer.getAddress()
+<img width="1029" alt="Screenshot 2025-05-05 at 6 42 23 PM" src="https://github.com/user-attachments/assets/fbded303-10be-473f-9e3d-5c638cd91be5" />
+<img width="1016" alt="Screenshot 2025-05-05 at 6 42 31 PM" src="https://github.com/user-attachments/assets/ece6c047-5794-4586-9a38-802c79039013" />
+
 
 ---
 
