@@ -108,6 +108,7 @@ Then open: http://localhost:8080/pretty_frontend.html
 	•	Paste in Choose2Reuse.sol
 	•	Compile (Solidity 0.8.18+)
 	•	Deploy using “Injected Web3” (MetaMask + Sepolia)
+ 	•	Enable optimization in advanced settings
 	•	Copy the contract address and paste it into the front end
 
 🔹 5. Connect Wallet and Test:
