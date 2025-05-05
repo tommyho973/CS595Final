@@ -717,7 +717,7 @@
         countdownInterval = setInterval(update, 1000);
       }
       
-      // Used through out all functions, displays accurate contract info in UI
+      // Used throughout all functions, displays accurate contract info in UI
       async function updateContractInfo() {
         if (!contract) return;
         
@@ -877,8 +877,7 @@
         // Show new QR
         new QRCode(qrWrapper, {
           text: id,
-          width:
- 212,
+          width: 212,
           height: 212,
           colorDark: "#000000",
           colorLight: "#ffffff",
@@ -983,7 +982,7 @@
           setTxStatus(tx.hash, false);
           
           await checkContainerStatus(decodedText);
-          // Before tell user container status
+          // Before showing container status
           showToast(isBorrowed ? 'Container returned successfully!' : 'Container borrowed successfully!', 'success');
           
         } catch (error) {
