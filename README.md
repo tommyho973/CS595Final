@@ -120,12 +120,12 @@ Then open: http://localhost:8080/pretty_frontend.html
 
 ⚙️ Admin Panel
 
-The owner (username: terrier, password: terrier123) can:
+The owner can:
 	•	📥 Claim deposits from expired borrows
 	•	💰 Update deposit amount (in ETH)
 	•	⏱ Change borrow duration (in days)
 
-Alternatively, upgrade to wallet-based verification by checking:
+Compared to the demo version, upgraded version now performs wallet-based verification by checking:
 
 javascript
 await contract.owner() === await signer.getAddress()
