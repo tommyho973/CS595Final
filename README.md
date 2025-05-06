@@ -1,5 +1,5 @@
 # CS595 Final Project
-♻️ Choose to Reuse – Blockchain-based Container Borrow/Return System
+♻️ SafePick – Blockchain-based Container Borrow/Return System
 
 A decentralized, trustless system for tracking reusable containers using Ethereum smart contracts, QR codes, and a user-friendly web interface.
 
