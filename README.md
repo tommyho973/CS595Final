@@ -117,11 +117,23 @@ npx http-server .
 
 Then open: http://localhost:8080/pretty_frontend.html
 
+🔹 4. Deploy the Smart Contract (via Remix):
+- Open https://remix.ethereum.org
+- Paste in Choose2Reuse.sol
+- Compile (Solidity 0.8.18+)
+- Deploy using “Injected Web3” (MetaMask + Sepolia)
+- Enable optimization in advanced settings
+- Copy the contract address and paste it into the front end
 🔹 5. Connect Wallet and Test:
 - Open the app in your browser
 - Click “Connect MetaMask”
 - Use the Generate QR and Scanner to borrow and return containers
 - Use the admin controls to collect forfeit deposits, update deposit amounts and return duration.
+<img width="749" alt="Screenshot 2025-05-05 at 7 48 19 PM" src="https://github.com/user-attachments/assets/7f91d89d-1003-40f6-bf1f-5142606519e4" />
+<img width="729" alt="Screenshot 2025-05-05 at 7 48 31 PM" src="https://github.com/user-attachments/assets/1dc92e89-bf3a-49d7-b427-90e4e418609e" />
+<img width="895" alt="Screenshot 2025-05-05 at 7 51 11 PM" src="https://github.com/user-attachments/assets/ad3b21fc-284e-438d-8856-ff19d1b9c17b" />
+<img width="676" alt="Screenshot 2025-05-05 at 7 51 36 PM" src="https://github.com/user-attachments/assets/ba317d6e-63a3-46ee-acf2-2e453d448a9e" />
+
 
 ---
 
@@ -141,7 +153,14 @@ Compared to the demo version, upgraded version now performs wallet-based verific
 await contract.owner() === await signer.getAddress()
 <img width="1029" alt="Screenshot 2025-05-05 at 6 42 23 PM" src="https://github.com/user-attachments/assets/fbded303-10be-473f-9e3d-5c638cd91be5" />
 <img width="1016" alt="Screenshot 2025-05-05 at 6 42 31 PM" src="https://github.com/user-attachments/assets/ece6c047-5794-4586-9a38-802c79039013" />
+
+<img width="823" alt="Screenshot 2025-05-05 at 7 48 39 PM" src="https://github.com/user-attachments/assets/1f865369-6a3b-4e29-b0fb-b0a309c00be1" />
+<img width="756" alt="Screenshot 2025-05-05 at 7 48 47 PM" src="https://github.com/user-attachments/assets/cd68e994-40bb-4018-9a15-e1523cb6b361" />
+<img width="903" alt="Screenshot 2025-05-05 at 7 52 58 PM" src="https://github.com/user-attachments/assets/37f436f3-ee14-40d1-81d4-92e2e6d90ecf" />
+<img width="726" alt="Screenshot 2025-05-05 at 7 53 09 PM" src="https://github.com/user-attachments/assets/54a00dde-a54b-42c4-82a6-5c4ae8dd44c5" />
 ```
+
+
 
 ---
 
