@@ -124,6 +124,7 @@ Then open: http://localhost:8080/pretty_frontend.html
 - Deploy using “Injected Web3” (MetaMask + Sepolia)
 - Enable optimization in advanced settings
 - Copy the contract address and paste it into the front end
+
 🔹 5. Connect Wallet and Test:
 - Open the app in your browser
 - Click “Connect MetaMask”
