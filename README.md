@@ -153,9 +153,6 @@ Compared to the demo version, upgraded version now performs wallet-based verific
 ```javascript
 await contract.owner() === await signer.getAddress()
 ```
-<img width="1029" alt="Screenshot 2025-05-05 at 6 42 23 PM" src="https://github.com/user-attachments/assets/fbded303-10be-473f-9e3d-5c638cd91be5" />
-<img width="1016" alt="Screenshot 2025-05-05 at 6 42 31 PM" src="https://github.com/user-attachments/assets/ece6c047-5794-4586-9a38-802c79039013" />
-
 <img width="823" alt="Screenshot 2025-05-05 at 7 48 39 PM" src="https://github.com/user-attachments/assets/1f865369-6a3b-4e29-b0fb-b0a309c00be1" />
 <img width="756" alt="Screenshot 2025-05-05 at 7 48 47 PM" src="https://github.com/user-attachments/assets/cd68e994-40bb-4018-9a15-e1523cb6b361" />
 <img width="903" alt="Screenshot 2025-05-05 at 7 52 58 PM" src="https://github.com/user-attachments/assets/37f436f3-ee14-40d1-81d4-92e2e6d90ecf" />
